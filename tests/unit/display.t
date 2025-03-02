@@ -31,20 +31,6 @@ is(display_date_tag($t), '<time datetime="2016-08-27T12:08:49">27. August 2016, 
 #	'<p><span class="field">Link to the product page on the official site of the producer:</span> <a href="http://producer.com">http://producer.com</a></p>'
 # );
 
-#test for URL localization
-#test for path not existing in urls_for_text
-my $textid = '/doesnotexist';
-is(url_for_text($textid), '/doesnotexist');
-
-# test a language other than default (en)
-$textid = '/ecoscore';
-$lc = 'es';
-is(url_for_text($textid), '/eco-score-el-impacto-medioambiental-de-los-productos-alimenticios');
-
-# test for language that does not exist (test defaults to en)
-$lc = 'does not exist';
-is(url_for_text($textid), '/eco-score-the-environmental-impact-of-food-products');
-
 $lc = 'en';
 
 #test search query
@@ -202,8 +188,8 @@ my $display_module = mock 'ProductOpener::Display' => (
 
 display_tag($facets_ref);
 
-is($facets_ref->{'current_link'}, '/category/breads/data-quality');
-is($facets_ref->{'redirect'}, '/category/breads/data-quality');
+is($facets_ref->{'current_link'}, '/facets/categories/breads/data-quality');
+is($facets_ref->{'redirect'}, '/facets/categories/breads/data-quality');
 
 $request_ref->{body_json}{labels_tags} = 'en:organic';
 is(request_param($request_ref, 'unexisting_field'), undef);

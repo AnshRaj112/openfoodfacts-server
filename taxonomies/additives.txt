@@ -1101,7 +1101,7 @@ lv: E133, Briljantzilais FCF
 mt: E133, Blu brillanti FCF
 nb: E133, briljantblà FCF
 nl: E133, Briljantblauw FCF, Briljantblauw
-pl: E133, Błękit brylantowy FCF
+pl: E133, Błękit brylantowy FCF, Błękit brylantowy
 pt: E133, Azul brilhante FCF
 ro: E133, Albastru briliant FCF
 sh: E133, Brilijantno plavo FCF
@@ -2219,7 +2219,7 @@ bg: E160b, Анато, биксин, норбиксин (i), БИКСИН И Н�
 ca: E160b, Arxiota, Bixina, norbixina de bixa, norbixina
 cs: E160b, Annatto, bixin, norbixin
 da: E160b, Annatto, Annattoekstrakter (bixin og norbixin), Annattoekstrakter, Bixin, Norbixin
-de: E160b, Annatto (Bixin und Norbixin), Bixin und Norbixin, Annatto, Achote, Orlean, E 160b, Anatto, Bixin, Norbixin, Annatto Bixin
+de: E160b, Annatto (Bixin und Norbixin), Bixin und Norbixin, Annatto, Achote, Orlean, E 160b, Anatto, Bixin, Norbixin, Annatto Bixin, Annatto Norbixin
 el: E160b, Αννατο, μπιξινη, νορμπιξινη (i)
 eo: E160b, Biksa kolorigilo
 es: E160b, Annato, bixina, norbixina, Achiote, anato
@@ -2369,7 +2369,7 @@ lv: E160e, Βeta-apo-8′-karotenāls (c30)
 mt: E160e, Beta-apo-8′-karotenal (c30)
 nl: E160e, Beta-apo-8'-carotenal (c30), Apocarotenal
 nl_be: E160e, Beta-apo-8'-carotenal (c30), Apocarotenal
-pl: E160e, Beta-apo-8′-karotenal (c30), β-apo-8′-karotenal
+pl: E160e, Beta-apo-8′-karotenal (c30), β-apo-8′-karotenal, beta-apo-8-karotenal
 pt: E160e, Beta-apo-8′-carotenal (c30)
 ro: E160e, Beta-apo-8′-carotenal (c30)
 sk: E160e, Beta-apo-8′-karotenal (c 30)
@@ -22118,7 +22118,7 @@ lv: E953, Izomalts
 mt: E953, Isomalt
 nb: E953, Isomalt
 nl: E953, Isomalt
-pl: E953, Isomalt
+pl: E953, Isomalt, Izomalt
 pt: E953, Isomalte
 ro: E953, Izomalt, isomalt
 ru: E953, изомальтит

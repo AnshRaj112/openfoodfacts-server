@@ -76,7 +76,6 @@ BEGIN {
 		&product_path
 		&product_path_from_id
 		&product_id_from_path
-		&product_exists
 		&get_owner_id
 		&normalize_product_data
 		&init_product
@@ -96,6 +95,7 @@ BEGIN {
 		&compute_completeness_and_missing_tags
 		&compute_product_history_and_completeness
 		&compute_languages
+		&review_product_type
 		&compute_changes_diff_text
 		&compute_data_sources
 		&compute_sort_keys
@@ -133,19 +133,20 @@ use ProductOpener::Orgs qw/retrieve_org/;
 use ProductOpener::Lang qw/$lc %tag_type_singular lang/;
 use ProductOpener::Tags qw/:all/;
 use ProductOpener::Mail qw/send_email/;
-use ProductOpener::URL qw/format_subdomain/;
+use ProductOpener::URL qw(format_subdomain get_owner_pretty_path);
 use ProductOpener::Data qw/execute_query get_products_collection get_recent_changes_collection/;
 use ProductOpener::MainCountries qw/compute_main_countries/;
 use ProductOpener::Text qw/remove_email remove_tags_and_quote/;
 use ProductOpener::Display qw/single_param/;
 use ProductOpener::Redis qw/push_to_redis_stream/;
-use ProductOpener::Food qw/%nutriments_lists/;
+use ProductOpener::Food qw/%nutriments_lists %cc_nutriment_table/;
 use ProductOpener::Units qw/normalize_product_quantity_and_serving_size/;
 
 # needed by analyze_and_enrich_product_data()
 # may be moved to another module at some point
 use ProductOpener::Packaging qw/analyze_and_combine_packaging_data/;
 use ProductOpener::DataQuality qw/check_quality/;
+use ProductOpener::TaxonomiesEnhancer qw/check_ingredients_between_languages/;
 
 # Specific to the product type
 use ProductOpener::FoodProducts qw/specific_processes_for_food_product/;
@@ -332,6 +333,53 @@ sub normalize_code_zeroes($code) {
 	return $code;
 }
 
+=head2 is_valid_upc12($code)
+
+C<is_valid_upc12()> this function validates a UPC-12 code by:
+- checking if the input is exactly 12 digits long,
+- verifying the check digit using the modulo 10 algorithm.
+
+=head3 Arguments
+
+UPC-12 Code in the Raw form: $code
+
+=head3 Return Values
+
+1 (true) if the UPC-12 code is valid, 0 (false) otherwise.
+
+=cut
+
+# use strict;
+# use warnings;
+
+sub is_valid_upc12 {
+	my ($upc) = @_;
+
+	# Check if the input is exactly 12 digits long
+	return 0 unless $upc =~ /^\d{12}$/;
+
+	# Extract the first 11 digits and the check digit
+	my $check_digit = substr($upc, -1);
+	my $upc_without_check_digit = substr($upc, 0, 11);
+
+	# Calculate the check digit
+	my $sum_odd = 0;
+	my $sum_even = 0;
+	for my $i (0 .. 10) {
+		if ($i % 2 == 0) {
+			$sum_odd += substr($upc_without_check_digit, $i, 1);
+		}
+		else {
+			$sum_even += substr($upc_without_check_digit, $i, 1);
+		}
+	}
+	my $total_sum = ($sum_odd * 3) + $sum_even;
+	my $calculated_check_digit = (10 - ($total_sum % 10)) % 10;
+
+	# Validate the check digit
+	return $check_digit == $calculated_check_digit;
+}
+
 =head2 normalize_code_with_gs1_ai($code)
 
 C<normalize_code_with_gs1_ai()> this function normalizes the product code by:
@@ -361,7 +409,19 @@ sub normalize_code_with_gs1_ai ($code) {
 
 		# Keep only digits, remove spaces, dashes and everything else
 		$code =~ s/\D//g;
+
+		# might be upc12
+		if (is_valid_upc12($code)) {
+			$code = "0" . $code;
+		}
+
+		# Check if the length of the code is 14 and the first character is '0'
+		if (length($code) == 14 && substr($code, 0, 1) eq '0') {
+			# Drop the first zero
+			$code = substr($code, 1);
+		}
 	}
+
 	return ($code, $ai_data_str);
 }
 
@@ -399,7 +459,7 @@ sub _try_normalize_code_gs1 ($code) {
 		}
 	};
 	if ($@) {
-		$log->warn("GS1Parser error", {error => $@}) if $log->is_warn();
+		# $log->warn("GS1Parser error", {error => $@}) if $log->is_warn();
 		$code = undef;
 		$ai_data_str = undef;
 	}
@@ -655,20 +715,6 @@ sub product_id_from_path ($product_path) {
 	# transform to id by simply removing "/"
 	$id =~ s/\///g;
 	return $id;
-}
-
-sub product_exists ($product_id) {
-
-	# deprecated, just use retrieve_product()
-
-	my $product_ref = retrieve_product($product_id);
-
-	if (not defined $product_ref) {
-		return 0;
-	}
-	else {
-		return $product_ref;
-	}
 }
 
 sub get_owner_id ($userid, $orgid, $ownerid) {
@@ -1113,6 +1159,12 @@ sub store_product ($user_id, $product_ref, $comment) {
 			}
 		}
 		delete $product_ref->{server};
+	}
+
+	# If we do not have a product_type, we set it to the default product_type of the current server
+	# This can happen if we are reverting a product to a previous version that did not have a product_type
+	if (not defined $product_ref->{product_type}) {
+		$product_ref->{product_type} = $options{product_type};
 	}
 
 	# In case we need to move a product from OFF to OBF etc.
@@ -2376,7 +2428,7 @@ sub compute_product_history_and_completeness ($current_product_ref, $changes_ref
 				}
 			}
 			elsif ($group eq 'nutriments') {
-				@ids = @{$nutriments_lists{europe}};
+				@ids = @{$nutriments_lists{off_europe}};
 			}
 			elsif ($group eq 'packagings') {
 				@ids = ("data", "weights_measured");
@@ -2753,7 +2805,7 @@ sub product_url ($code_or_ref) {
 	}
 
 	$code = ($code // "");
-	return "/$path/$code" . $titleid;
+	return get_owner_pretty_path($Owner_id) . "/$path/$code" . $titleid;
 }
 
 =head2 product_action_url ( $code, $action )
@@ -2850,12 +2902,13 @@ sub compute_codes ($product_ref) {
 
 	my $ean = undef;
 
+	# Note: we now normalize codes, so we should not have conflicts
 	if (length($code) == 12) {
 		$ean = '0' . $code;
-		if (product_exists('0' . $code)) {
+		if (retrieve_product('0' . $code)) {
 			push @codes, "conflict-with-ean-13";
 		}
-		elsif (-e ("$BASE_DIRS{PRODUCTS}/" . product_path_from_id("0" . $code))) {
+		elsif (retrieve_product('0' . $code), 1) {
 			push @codes, "conflict-with-deleted-ean-13";
 		}
 	}
@@ -2864,7 +2917,7 @@ sub compute_codes ($product_ref) {
 		$ean = $code;
 		my $upc = $code;
 		$upc =~ s/^.//;
-		if (product_exists($upc)) {
+		if (retrieve_product($upc)) {
 			push @codes, "conflict-with-upc-12";
 		}
 	}
@@ -2951,6 +3004,59 @@ sub compute_languages ($product_ref) {
 	$product_ref->{languages_codes} = \%languages_codes;
 	$product_ref->{languages_tags} = \@languages;
 	$product_ref->{languages_hierarchy} = \@languages_hierarchy;
+
+	return;
+}
+
+=head2 review_product_type ( $product_ref )
+
+Reviews the product type based on the presence of specific tags in the categories field.
+Updates the product type if necessary.
+
+=head3 Arguments
+
+=head4 Product reference $product_ref
+
+A reference to a hash containing the product details.
+
+=cut
+
+sub review_product_type ($product_ref) {
+
+	my $error;
+
+	my $expected_type;
+	if (has_tag($product_ref, "categories", "en:open-beauty-facts")) {
+		$expected_type = "beauty";
+	}
+	elsif (has_tag($product_ref, "categories", "en:open-food-facts")) {
+		$expected_type = "food";
+	}
+	elsif (has_tag($product_ref, "categories", "en:open-pet-food-facts")) {
+		$expected_type = "petfood";
+	}
+	elsif (has_tag($product_ref, "categories", "en:open-products-facts")) {
+		$expected_type = "product";
+	}
+
+	if ($expected_type and ($product_ref->{product_type} ne $expected_type)) {
+		$error = change_product_type($product_ref, $expected_type);
+	}
+
+	if ($error) {
+		$log->error("review_product_type - error", {error => $error, product_ref => $product_ref});
+	}
+	else {
+		# We remove the tag en:incorrect-product-type and its children before the product is stored on the server of the new type
+		remove_tag($product_ref, "categories", "en:incorrect-product-type");
+		remove_tag($product_ref, "categories", "en:open-beauty-facts");
+		remove_tag($product_ref, "categories", "en:open-food-facts");
+		remove_tag($product_ref, "categories", "en:open-pet-food-facts");
+		remove_tag($product_ref, "categories", "en:open-products-facts");
+		remove_tag($product_ref, "categories", "en:non-food-products");
+		remove_tag($product_ref, "categories", "en:non-pet-food-products");
+		remove_tag($product_ref, "categories", "en:non-beauty-products");
+	}
 
 	return;
 }
@@ -3625,7 +3731,7 @@ sub add_images_urls_to_product ($product_ref, $target_lc, $specific_imagetype = 
 =head2 analyze_and_enrich_product_data ($product_ref, $response_ref)
 
 This function processes product raw data to analyze it and enrich it.
-For instance to analyze ingredients and compute scores such as Nutri-Score and Eco-Score.
+For instance to analyze ingredients and compute scores such as Nutri-Score and Environmental-Score.
 
 =head3 Parameters
 
@@ -3673,17 +3779,22 @@ sub analyze_and_enrich_product_data ($product_ref, $response_ref) {
 	# Needed before we analyze packaging data in order to compute packaging weights per 100g of product
 	normalize_product_quantity_and_serving_size($product_ref);
 
-	# We need packaging analysis before calling the Eco-Score for food products
+	# We need packaging analysis before calling the Environmental-Score for food products
 	analyze_and_combine_packaging_data($product_ref, $response_ref);
 
 	compute_languages($product_ref);    # need languages for allergens detection and cleaning ingredients
+
+	# change the product type of non-food categorized products (issue #11094)
+	if (has_tag($product_ref, "categories", "en:incorrect-product-type")) {
+		review_product_type($product_ref);
+	}
 
 	# Run special analysis, score calculations that it specific to the product type
 
 	if (($options{product_type} eq "food")) {
 		specific_processes_for_food_product($product_ref);
 	}
-	elsif (($options{product_type} eq "pet_food")) {
+	elsif (($options{product_type} eq "petfood")) {
 		specific_processes_for_pet_food_product($product_ref);
 	}
 	elsif (($options{product_type} eq "beauty")) {
@@ -3691,6 +3802,10 @@ sub analyze_and_enrich_product_data ($product_ref, $response_ref) {
 	}
 
 	ProductOpener::DataQuality::check_quality($product_ref);
+
+	if (defined $taxonomy_fields{'ingredients'}) {
+		check_ingredients_between_languages($product_ref);
+	}
 
 	# Sort misc_tags in order to have a consistent order
 	if (defined $product_ref->{misc_tags}) {

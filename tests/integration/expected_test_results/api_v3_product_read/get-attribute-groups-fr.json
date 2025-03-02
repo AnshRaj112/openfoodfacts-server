@@ -23,6 +23,7 @@
                   "id" : "low_salt",
                   "missing" : "Données nutritionnelles manquantes",
                   "name" : "Sel",
+                  "panel_id" : "nutrition_facts_table",
                   "status" : "unknown",
                   "title" : "Sel en quantité inconnue"
                },
@@ -32,6 +33,7 @@
                   "id" : "low_fat",
                   "missing" : "Données nutritionnelles manquantes",
                   "name" : "Matières grasses",
+                  "panel_id" : "nutrition_facts_table",
                   "status" : "unknown",
                   "title" : "Matières grasses en quantité inconnue"
                },
@@ -41,6 +43,7 @@
                   "id" : "low_sugars",
                   "missing" : "Données nutritionnelles manquantes",
                   "name" : "Sucres",
+                  "panel_id" : "nutrition_facts_table",
                   "status" : "unknown",
                   "title" : "Sucres en quantité inconnue"
                },
@@ -50,6 +53,7 @@
                   "id" : "low_saturated_fat",
                   "missing" : "Données nutritionnelles manquantes",
                   "name" : "Acides gras saturés",
+                  "panel_id" : "nutrition_facts_table",
                   "status" : "unknown",
                   "title" : "Acides gras saturés en quantité inconnue"
                }
@@ -273,13 +277,13 @@
                   "description" : "",
                   "description_short" : "Impact modéré sur l'environnement",
                   "grade" : "c",
-                  "icon_url" : "http://static.openfoodfacts.localhost/images/attributes/dist/ecoscore-c.svg",
+                  "icon_url" : "http://static.openfoodfacts.localhost/images/attributes/dist/green-score-c.svg",
                   "id" : "ecoscore",
                   "match" : 47,
-                  "name" : "Eco-Score",
-                  "panel_id" : "ecoscore",
+                  "name" : "Green-Score",
+                  "panel_id" : "environmental_score",
                   "status" : "known",
-                  "title" : "Eco-Score C"
+                  "title" : "Green-Score C"
                },
                {
                   "description" : "",
