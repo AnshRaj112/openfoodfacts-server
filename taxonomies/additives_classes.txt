@@ -412,10 +412,10 @@ el: Χρωστική ουσία
 es: Colorante, colorantes, color, colorante de superficie, pigmentos de coloración y decoración, pigmentos de coloración, pigmentos de decoración, colorantes alimentarios, colorante alimentario
 et: Toiduvärv
 fi: Väri, Väriä, Värit, Värejä, Väriaine, Väriainetta, Väriaineet, Väriaineita, Elintarvikeväri, värjäävät elintarvikkeet
-fr: Colorant, colorant de surface, pigment décoratif, pigment colorant, colorants, colorant alimentaire, colorants alimentaires
+fr: Colorant, colorant de surface, pigment décoratif, pigment colorant, colorants, colorant alimentaire, colorants alimentaires, aliments colorants
 ga: Dath
 he: צבע
-hr: boja, bojila, bojilo, bojenje, namirnice za bojanje, hrana za bojenje
+hr: boja, bojila, bojilo, bojenje, namirnice za bojanje, hrana za bojenje, hrana za bojanje
 hu: Színezék, mesterséges színezék, színezőanyag, színezékek, színezőanyagok, színező anyag
 is: Litarefni
 it: Colorante, coloranti, alimento colorante
@@ -1330,7 +1330,13 @@ wikidata:en: Q7595716
 
 < en:stabiliser
 en: natural stabilizer
+da: naturlig stabilisator
 it: stabilizzante naturale
+
+< en:stabiliser
+en: colour stabiliser, color stabilizer
+da: farvestabilisator
+sv: färgstabilisator
 
 # nova:en:sweetener
 en: Sweetener, bulk sweetener, intense sweetener, natural sweetener

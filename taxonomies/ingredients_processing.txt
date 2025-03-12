@@ -119,6 +119,7 @@ sv: vald, valda, valt, valda
 en: unfiltered
 bg: непречистен, нефилтриран
 ca: no filtrat
+cs: nefiltrovana
 de: naturtrüb, naturtrüber
 es: no filtrado
 fr: non filtré, trouble
@@ -443,6 +444,7 @@ sv: mald, malda, malen
 # en:wiktionary:grind
 
 # <en:ground
+en: finely ground
 de: fein gemahlen, fein gemahlene, fein gemahlener, fein gemahlenes
 hr: fino mljeveno
 hu: finomra őrölt
@@ -570,7 +572,7 @@ de: Brösel
 es: migaja, migajas
 # fi:rouhe, rouheet
 fr: miette, miettes
-hr: mrvica, mrvica od
+hr: mrvica, mrvica od, mrvice
 hu: zsemlemorzsa, zsemlemorzsák
 it: briciola, briciole
 ja: パン粉
@@ -823,6 +825,9 @@ pl: obrany, obrana, obrane
 pt: pelado, pelada, pelados, peladas, sem pele, sem peles
 sv: skalade
 # en:wiktionary:peeled
+
+en: scalding
+sv: skållning
 
 de: entspeltzt
 
@@ -1485,7 +1490,7 @@ hu: préselt, sajtolt
 it: spremuto, spremuta, spremuti, spremute, spremuto di, spremuta di, spremuto d', spremuta d'
 pl: tłoczony, tłoczona, tłoczone, prasowane, prasowany, prasowana, wyciskany, wyciskane, wyciskana, wyciskanego
 pt: espremido, espremida, espremidos, espremidas
-sv: presset
+sv: presset, pressade
 
 #<en:pressed
 
@@ -1933,7 +1938,7 @@ ca: fos
 de: geschmolzen, geschmolzene, geschmolzenes
 es: fundido, fundida, fundidos, fundidas
 fr: fondu, fondue, fondus, fondues
-hr: topljenih
+hr: topljenih, topljeni
 it: fuso, fusa, fusi, fuse
 ja: 溶けた
 nl: gesmolten
@@ -2663,7 +2668,7 @@ it: non idrogenato, non idrogenati
 nl: niet gehydrogeneerd, niet gehydrogeneerde
 pl: nieuwodorniony, nieutwardzony, nieutwardzone
 pt: nâo hidrogenada
-ro: nehidrogenate
+ro: nehidrogenate, nehidrogenat
 sv: ohärdad
 
 #en:description:Breakdown into simpler chemical constituents by appropriate treatment with water and possibly either enzymes or acid/alkali
